@@ -11,7 +11,7 @@ public class ScreenController : MonoBehaviour
 
     void Start()
     {
-       StartCoroutine(GetRequest());
+       //StartCoroutine(GetRequest());
     }
     // Start is called before the first frame update
    
@@ -46,32 +46,5 @@ public class ScreenController : MonoBehaviour
         StartCoroutine(GetRequest("https://error.html"));
     }*/
 
-    IEnumerator GetRequest()
-    {
-        string uri = "https://bit.ly/3iPzhoD";
-        using (UnityWebRequest webRequest = UnityWebRequest.Get(uri))
-        {
-            // Request and wait for the desired page.
-            Debug.Log("Incoroutine Function");
-            yield return webRequest.SendWebRequest();
-            Debug.Log("Sent Request Done");
-
-            //string[] pages = uri.Split('/');
-            //int page = pages.Length - 1;
-
-            switch (webRequest.result)
-            {
-                case UnityWebRequest.Result.ConnectionError:
-                case UnityWebRequest.Result.DataProcessingError:
-                   Debug.LogError(/*pages[page] */ ": Error: " + webRequest.error);
-                    break;
-                case UnityWebRequest.Result.ProtocolError:
-                    Debug.LogError(/*pages[page] */ ": HTTP Error: " + webRequest.error);
-                    break;
-                case UnityWebRequest.Result.Success:
-                    Debug.Log(/*pages[page] +*/ ":\nReceived: " + webRequest.downloadHandler.text);
-                    break;
-            }
-        }
-    }
+   
 }
