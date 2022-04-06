@@ -1,26 +1,32 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.Networking;
+//using Newtonsoft.Json.Converters;
+
 
 
 public class ListTheContent : MonoBehaviour
 {
+    public string prefabName;
 
     // Start is called before the first frame update
     void Start()
     {
-        if(ScreenController.keyword!=null)
+        if (ScreenController.keyword != null)
         {
             StartCoroutine(GetRequest());
         }
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
     IEnumerator GetRequest()
     {
@@ -32,25 +38,80 @@ public class ListTheContent : MonoBehaviour
             yield return webRequest.SendWebRequest();
             Debug.Log("Sent Request Done");
 
-            //string[] pages = uri.Split('/');
-            //int page = pages.Length - 1;
+            string[] pages = uri.Split('/');
+            int page = pages.Length - 1;
 
             switch (webRequest.result)
             {
                 case UnityWebRequest.Result.ConnectionError:
                 case UnityWebRequest.Result.DataProcessingError:
-                    Debug.LogError(/*pages[page] */ ": Error: " + webRequest.error);
+                    Debug.LogError(pages[page] + ": Error: " + webRequest.error);
                     break;
                 case UnityWebRequest.Result.ProtocolError:
-                    Debug.LogError(/*pages[page] */ ": HTTP Error: " + webRequest.error);
+                    Debug.LogError(pages[page] + ": HTTP Error: " + webRequest.error);
                     break;
                 case UnityWebRequest.Result.Success:
-                    Debug.Log(/*pages[page] +*/ ":\nReceived: " + webRequest.downloadHandler.text);
+                    Debug.Log(pages[page] + ":\nReceived: " + webRequest.downloadHandler.text);
                     break;
             }
+            CreateList(webRequest.downloadHandler.text);
         }
     }
+
+    public void CreateList(string jsonString)
+    {
+        if (jsonString != null)
+        {
+            Root theContent = new Root();
+            JsonConvert.PopulateObject(jsonString, theContent);
+            if (theContent.results.Count != 0)
+            {
+                string Keyword = ScreenController.keyword;
+                switch (Keyword)
+                {
+                    case "Park":
+                        prefabName = "ParkDataList";
+                        break;
+                    case "School":
+                        prefabName = "SchoolDataList";
+                        break;
+                    case "Hotel":
+                        prefabName = "HotelDataList";
+                        break;
+                    case "Hospital":
+                        prefabName = "HospitalDataList";
+                        break;
+                    default:
+                        break;
+
+
+                }
+
+                for (int i = 0; i < theContent.results.Count; i++)
+                {
+                    GameObject thePrefab = Instantiate(Resources.Load("Assests/Prefabs/" + prefabName)) as GameObject;
+                    GameObject contentHolder = GameObject.FindGameObjectWithTag("Content");
+                    thePrefab.transform.parent = contentHolder.transform;
+                    Text theText = thePrefab.GetComponentInChildren<Text>();
+                    theText.text = theContent.results[i].name;
+                    // GameObject contentHolder = GameObject.FindGameObjectsWithTag("Content");
+                    //thePrefab.transform.parent = contentHolder.transform;
+                    //Text theText = thePrefab
+
+                    Debug.Log(theContent.results[i].name);
+                }
+            }
+        }
+
+
+        /*
+        Debug.Log(theContent.results[0].name);
+        Debug.Log(theContent.results[0].geometry.location.lat);
+        Debug.Log(theContent.results[0].geometry.location.lng);*/
+    }
 }
+
+
 // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
 public class Location
 {
